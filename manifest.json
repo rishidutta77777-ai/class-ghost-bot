@@ -1,13 +1,21 @@
 {
-  "name": "Class Ghost Bot",
-  "short_name": "ClassGhost",
-  "start_url": "./index.html",
+  "name": "Class Ghost",
+  "short_name": "Class Ghost",
+  "id": "/class-ghost-bot/",
+  "start_url": "/class-ghost-bot/",
+  "scope": "/class-ghost-bot/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "/class-ghost-bot/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/class-ghost-bot/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
