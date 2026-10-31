@@ -5,20 +5,33 @@
   "start_url": "/class-ghost-bot/",
   "scope": "/class-ghost-bot/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "/class-ghost-bot/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/class-ghost-bot/icon-512.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
