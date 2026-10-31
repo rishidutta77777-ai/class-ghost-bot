@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Class Ghost</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#121212">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     body {
       background-color: #121212;
@@ -92,7 +97,6 @@
     let pollInterval = null;
 
     function validateForm() {
-      const url = document.getElementById('meetingUrl').value.trim();
       const cookiesRaw = document.getElementById('cookies').value.trim();
       const startBtn = document.getElementById('startBtn');
       const statusBox = document.getElementById('status-box');
@@ -157,7 +161,6 @@
         const data = await res.json();
         currentSessionId = data.session_id;
 
-        // Wipe the sensitive cookie field from the screen immediately
         document.getElementById('cookies').value = "";
         validateForm();
 
@@ -209,7 +212,11 @@
     document.getElementById('meetingUrl').addEventListener('input', validateForm);
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW Registered', reg))
+          .catch(err => console.error('SW Registration Failed', err));
+      });
     }
   </script>
 </body>
