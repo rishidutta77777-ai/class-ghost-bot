@@ -83,7 +83,7 @@
 
     <label>Google Session Cookies (JSON) <span class="required">*</span></label>
     <textarea id="cookies" placeholder="Paste exported JSON from Cookie-Editor here..." oninput="validateForm()"></textarea>
-    <div class="hint">Required to bypass Google's 'Trusted' meeting restrictions. Ephemeral session: never saved to disk or persistent databases.</div>
+    <div class="hint">Required to bypass Google's 'Trusted' meeting restrictions. Ephemeral session: never saved to disk.</div>
 
     <button class="btn-start" id="startBtn" onclick="startBot()" disabled>Send Bot to Class</button>
     <button class="btn-stop" id="stopBtn" onclick="stopBot()">Leave Class Now</button>
@@ -92,7 +92,7 @@
   </div>
 
   <script>
-    let currentSessionId = null;
+    let currentSessionId = localStorage.getItem('classghost_session_id');
     let pollInterval = null;
 
     function validateForm() {
@@ -101,8 +101,10 @@
       const statusBox = document.getElementById('status-box');
 
       if (!cookiesRaw) {
-        startBtn.disabled = true;
-        statusBox.innerText = "Status: Idle (Paste cookies to enable)";
+        if (!currentSessionId) {
+          startBtn.disabled = true;
+          statusBox.innerText = "Status: Idle (Paste cookies to enable)";
+        }
         return false;
       }
 
@@ -139,7 +141,7 @@
 
       const parsedCookies = JSON.parse(cookiesRaw);
 
-      statusBox.innerText = "Status: Injecting ephemeral session & launching bot...";
+      statusBox.innerText = "Status: Injecting session & launching bot...";
       document.getElementById('startBtn').disabled = true;
 
       try {
@@ -153,25 +155,27 @@
           })
         });
 
-        if (!res.ok) {
-          throw new Error("Backend rejected request.");
-        }
+        if (!res.ok) throw new Error("Backend rejected request.");
 
         const data = await res.json();
         currentSessionId = data.session_id;
+        localStorage.setItem('classghost_session_id', currentSessionId);
 
         document.getElementById('cookies').value = "";
         validateForm();
 
-        statusBox.innerText = "Status: Bot is in class (Authenticated).";
-        document.getElementById('startBtn').style.display = "none";
-        document.getElementById('stopBtn').style.display = "block";
-
-        pollInterval = setInterval(checkStatus, 5000);
+        showActiveUi();
+        pollInterval = setInterval(checkStatus, 6000);
       } catch (err) {
         statusBox.innerText = "Error: Could not reach backend server.";
         document.getElementById('startBtn').disabled = false;
       }
+    }
+
+    function showActiveUi() {
+      document.getElementById('status-box').innerText = "Status: Bot is in class (Authenticated).";
+      document.getElementById('startBtn').style.display = "none";
+      document.getElementById('stopBtn').style.display = "block";
     }
 
     async function checkStatus() {
@@ -201,11 +205,18 @@
 
     function resetUi() {
       clearInterval(pollInterval);
+      localStorage.removeItem('classghost_session_id');
       currentSessionId = null;
       document.getElementById('status-box').innerText = "Status: Meeting ended / Disconnected";
       document.getElementById('startBtn').style.display = "block";
       document.getElementById('startBtn').disabled = true;
       document.getElementById('stopBtn').style.display = "none";
+    }
+
+    // Restore UI if tab was reloaded or switched away
+    if (currentSessionId) {
+      showActiveUi();
+      pollInterval = setInterval(checkStatus, 6000);
     }
 
     document.getElementById('meetingUrl').addEventListener('input', validateForm);
