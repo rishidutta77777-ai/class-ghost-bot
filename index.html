@@ -22,12 +22,12 @@
       padding: 24px;
       border-radius: 12px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       box-sizing: border-box;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     h2 { margin-top: 0; text-align: center; }
-    label { font-size: 13px; color: #bbb; display: block; margin-top: 14px; }
+    label { font-size: 13px; color: #bbb; display: block; margin-top: 14px; font-weight: 500; }
     input, textarea {
       width: 100%;
       padding: 10px;
@@ -39,8 +39,9 @@
       box-sizing: border-box;
       font-size: 14px;
     }
-    textarea { resize: vertical; height: 60px; font-family: monospace; font-size: 11px; }
-    .hint { font-size: 11px; color: #888; margin-top: 4px; }
+    textarea { resize: vertical; height: 90px; font-family: monospace; font-size: 11px; }
+    .required { color: #ff5555; }
+    .hint { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
     button {
       width: 100%;
       padding: 12px;
@@ -50,8 +51,10 @@
       font-size: 16px;
       cursor: pointer;
       margin-top: 20px;
+      transition: background 0.2s;
     }
     .btn-start { background-color: #238636; color: white; }
+    .btn-start:disabled { background-color: #333333; color: #777; cursor: not-allowed; }
     .btn-stop { background-color: #da3633; color: white; margin-top: 10px; display: none; }
     #status-box {
       margin-top: 16px;
@@ -71,49 +74,69 @@
     <label>Backend URL</label>
     <input type="text" id="backendUrl" value="https://class-ghost-backend.onrender.com">
 
-    <label>Meeting Link</label>
+    <label>Meeting Link <span class="required">*</span></label>
     <input type="text" id="meetingUrl" placeholder="https://meet.google.com/xxx-xxxx-xxx">
 
-    <label>Display Name (For Guest Mode)</label>
-    <input type="text" id="botName" value="Guest">
+    <label>Google Session Cookies (JSON) <span class="required">*</span></label>
+    <textarea id="cookies" placeholder="Paste exported JSON from Cookie-Editor here..." oninput="validateForm()"></textarea>
+    <div class="hint">Required to bypass Google's 'Trusted' meeting restrictions. Ephemeral session: never saved to disk or persistent databases.</div>
 
-    <label>Google Session Cookies (Optional - To Bypass "Trusted" Locks)</label>
-    <textarea id="cookies" placeholder='Paste JSON cookies from Cookie-Editor extension (keeps your session private)'></textarea>
-    <div class="hint">Leave blank if the meeting allows anonymous guests.</div>
-
-    <button class="btn-start" id="startBtn" onclick="startBot()">Send Bot to Class</button>
+    <button class="btn-start" id="startBtn" onclick="startBot()" disabled>Send Bot to Class</button>
     <button class="btn-stop" id="stopBtn" onclick="stopBot()">Leave Class Now</button>
 
-    <div id="status-box">Status: Idle</div>
+    <div id="status-box">Status: Idle (Paste cookies to enable)</div>
   </div>
 
   <script>
     let currentSessionId = null;
     let pollInterval = null;
 
+    function validateForm() {
+      const url = document.getElementById('meetingUrl').value.trim();
+      const cookiesRaw = document.getElementById('cookies').value.trim();
+      const startBtn = document.getElementById('startBtn');
+      const statusBox = document.getElementById('status-box');
+
+      if (!cookiesRaw) {
+        startBtn.disabled = true;
+        statusBox.innerText = "Status: Idle (Paste cookies to enable)";
+        return false;
+      }
+
+      try {
+        const parsed = JSON.parse(cookiesRaw);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          startBtn.disabled = true;
+          statusBox.innerText = "Status: Cookies must be a non-empty JSON array.";
+          return false;
+        }
+      } catch (e) {
+        startBtn.disabled = true;
+        statusBox.innerText = "Status: Invalid JSON format in cookies box.";
+        return false;
+      }
+
+      startBtn.disabled = false;
+      statusBox.innerText = "Status: Ready to join.";
+      return true;
+    }
+
     async function startBot() {
+      if (!validateForm()) return;
+
       const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
       const url = document.getElementById('meetingUrl').value.trim();
-      const name = document.getElementById('botName').value.trim();
       const cookiesRaw = document.getElementById('cookies').value.trim();
       const statusBox = document.getElementById('status-box');
 
       if (!url) {
-        alert("Please enter a meeting link");
+        alert("Please enter a meeting link.");
         return;
       }
 
-      let parsedCookies = null;
-      if (cookiesRaw) {
-        try {
-          parsedCookies = JSON.parse(cookiesRaw);
-        } catch (e) {
-          alert("Invalid cookie format. It must be valid JSON array exported from Cookie-Editor.");
-          return;
-        }
-      }
+      const parsedCookies = JSON.parse(cookiesRaw);
 
-      statusBox.innerText = "Status: Spawning bot on cloud...";
+      statusBox.innerText = "Status: Injecting ephemeral session & launching bot...";
       document.getElementById('startBtn').disabled = true;
 
       try {
@@ -122,20 +145,29 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             url: url, 
-            name: name,
+            name: "Authenticated Bot",
             cookies: parsedCookies 
           })
         });
+
+        if (!res.ok) {
+          throw new Error("Backend rejected request.");
+        }
+
         const data = await res.json();
         currentSessionId = data.session_id;
 
-        statusBox.innerText = "Status: Bot is in class.";
+        // Wipe the sensitive cookie field from the screen immediately
+        document.getElementById('cookies').value = "";
+        validateForm();
+
+        statusBox.innerText = "Status: Bot is in class (Authenticated).";
         document.getElementById('startBtn').style.display = "none";
         document.getElementById('stopBtn').style.display = "block";
 
         pollInterval = setInterval(checkStatus, 5000);
       } catch (err) {
-        statusBox.innerText = "Error connecting to backend server.";
+        statusBox.innerText = "Error: Could not reach backend server.";
         document.getElementById('startBtn').disabled = false;
       }
     }
@@ -170,9 +202,11 @@
       currentSessionId = null;
       document.getElementById('status-box').innerText = "Status: Meeting ended / Disconnected";
       document.getElementById('startBtn').style.display = "block";
-      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').disabled = true;
       document.getElementById('stopBtn').style.display = "none";
     }
+
+    document.getElementById('meetingUrl').addEventListener('input', validateForm);
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
