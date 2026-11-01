@@ -1,232 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Class Ghost</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="theme-color" content="#121212">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GhostAttend // Mobile Controller</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      background-color: #121212;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px;
-      margin: 0;
-    }
-    .card {
-      background: #1e1e1e;
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 440px;
-      box-sizing: border-box;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    h2 { margin-top: 0; text-align: center; }
-    label { font-size: 13px; color: #bbb; display: block; margin-top: 14px; font-weight: 500; }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      border-radius: 6px;
-      color: #fff;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-    textarea { resize: vertical; height: 90px; font-family: monospace; font-size: 11px; }
-    .required { color: #ff5555; }
-    .hint { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background 0.2s;
-    }
-    .btn-start { background-color: #238636; color: white; }
-    .btn-start:disabled { background-color: #333333; color: #777; cursor: not-allowed; }
-    .btn-stop { background-color: #da3633; color: white; margin-top: 10px; display: none; }
-    #status-box {
-      margin-top: 16px;
-      padding: 12px;
-      background: #2a2a2a;
-      border-radius: 6px;
-      font-size: 14px;
-      text-align: center;
-    }
+    body { background-color: #090d16; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .card { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(51, 65, 85, 0.7); }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
 
-  <div class="card">
-    <h2>Class Ghost</h2>
-    
-    <label>Backend URL</label>
-    <input type="text" id="backendUrl" value="https://class-ghost-backend.onrender.com">
+  <header class="flex items-center justify-between py-3 border-b border-slate-800">
+    <div class="flex items-center gap-2.5">
+      <span id="dot" class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+      <div>
+        <h1 class="text-base font-bold">GhostAttend <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">512MB LITE</span></h1>
+        <p id="statusText" class="text-xs text-slate-400">Idle • Ready to deploy</p>
+      </div>
+    </div>
+    <button onclick="document.getElementById('serverBox').classList.toggle('hidden')" class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+      ⚙️ Server URL
+    </button>
+  </header>
 
-    <label>Meeting Link <span class="required">*</span></label>
-    <input type="text" id="meetingUrl" placeholder="https://meet.google.com/xxx-xxxx-xxx">
-
-    <label>Google Session Cookies (JSON) <span class="required">*</span></label>
-    <textarea id="cookies" placeholder="Paste exported JSON from Cookie-Editor here..." oninput="validateForm()"></textarea>
-    <div class="hint">Required to bypass Google's 'Trusted' meeting restrictions. Ephemeral session: never saved to disk.</div>
-
-    <button class="btn-start" id="startBtn" onclick="startBot()" disabled>Send Bot to Class</button>
-    <button class="btn-stop" id="stopBtn" onclick="stopBot()">Leave Class Now</button>
-
-    <div id="status-box">Status: Idle (Paste cookies to enable)</div>
+  <!-- Server URL Setting -->
+  <div id="serverBox" class="hidden card rounded-xl p-3.5 my-2 space-y-2">
+    <label class="text-xs text-slate-400 font-semibold uppercase">Your Cloud Backend URL (Render / Koyeb / etc.)</label>
+    <input id="backendUrl" type="url" placeholder="https://your-app-name.onrender.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+    <button onclick="saveBackend()" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold">Save Backend URL</button>
   </div>
 
+  <main class="space-y-4 my-auto py-3">
+    <div class="card rounded-2xl p-5 space-y-4 shadow-xl">
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-400">Google Meet Class Link</label>
+        <input id="meetUrl" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-400">Custom Name to Join With</label>
+        <input id="studentName" type="text" value="Hrishikesh Dutta" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold uppercase text-slate-400">Max Mins</label>
+          <input id="maxDuration" type="number" value="50" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase text-slate-400">Auto-Leave Below</label>
+          <input id="minParticipants" type="number" value="5" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+      </div>
+
+      <button onclick="joinClass()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm shadow-lg">
+        🚀 SEND STEALTH BOT TO CLASS
+      </button>
+
+      <button onclick="leaveClass()" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm shadow-lg">
+        🛑 EMERGENCY LEAVE CLASS NOW
+      </button>
+    </div>
+
+    <div class="card rounded-xl p-3.5 text-xs font-mono space-y-1">
+      <div class="text-slate-400 uppercase text-[10px]">Live Server Status</div>
+      <div id="liveMsg" class="text-emerald-400">Waiting for command...</div>
+    </div>
+  </main>
+
+  <footer class="text-center text-[11px] text-slate-500 py-2">
+    Zero-Width Anti-Spoof Name • 512MB RAM Protected
+  </footer>
+
   <script>
-    let currentSessionId = localStorage.getItem('classghost_session_id');
-    let pollInterval = null;
+    window.onload = () => {
+      const saved = localStorage.getItem('backendUrl') || '';
+      document.getElementById('backendUrl').value = saved;
+      if (saved) pollStatus();
+      setInterval(pollStatus, 6000);
+    };
 
-    function validateForm() {
-      const cookiesRaw = document.getElementById('cookies').value.trim();
-      const startBtn = document.getElementById('startBtn');
-      const statusBox = document.getElementById('status-box');
-
-      if (!cookiesRaw) {
-        if (!currentSessionId) {
-          startBtn.disabled = true;
-          statusBox.innerText = "Status: Idle (Paste cookies to enable)";
-        }
-        return false;
-      }
-
-      try {
-        const parsed = JSON.parse(cookiesRaw);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-          startBtn.disabled = true;
-          statusBox.innerText = "Status: Cookies must be a non-empty JSON array.";
-          return false;
-        }
-      } catch (e) {
-        startBtn.disabled = true;
-        statusBox.innerText = "Status: Invalid JSON format in cookies box.";
-        return false;
-      }
-
-      startBtn.disabled = false;
-      statusBox.innerText = "Status: Ready to join.";
-      return true;
+    function getBaseUrl() {
+      return (localStorage.getItem('backendUrl') || '').replace(/\/+$/, '');
     }
 
-    async function startBot() {
-      if (!validateForm()) return;
+    function saveBackend() {
+      const val = document.getElementById('backendUrl').value.trim().replace(/\/+$/, '');
+      localStorage.setItem('backendUrl', val);
+      document.getElementById('serverBox').classList.add('hidden');
+      document.getElementById('liveMsg').textContent = "Saved Backend: " + val;
+      pollStatus();
+    }
 
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
-      const url = document.getElementById('meetingUrl').value.trim();
-      const cookiesRaw = document.getElementById('cookies').value.trim();
-      const statusBox = document.getElementById('status-box');
-
-      if (!url) {
-        alert("Please enter a meeting link.");
+    async function joinClass() {
+      const base = getBaseUrl();
+      if (!base) {
+        document.getElementById('serverBox').classList.remove('hidden');
+        document.getElementById('liveMsg').textContent = "Please save your Cloud Backend URL first!";
         return;
       }
-
-      const parsedCookies = JSON.parse(cookiesRaw);
-
-      statusBox.innerText = "Status: Injecting session & launching bot...";
-      document.getElementById('startBtn').disabled = true;
-
+      const payload = {
+        meet_url: document.getElementById('meetUrl').value.trim(),
+        student_name: document.getElementById('studentName').value.trim(),
+        max_duration: document.getElementById('maxDuration').value,
+        min_participants: document.getElementById('minParticipants').value
+      };
+      document.getElementById('liveMsg').textContent = "Sending join request to cloud server...";
       try {
-        const res = await fetch(`${backend}/start`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            url: url, 
-            name: "Authenticated Bot",
-            cookies: parsedCookies 
-          })
+        const res = await fetch(`${base}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-
-        if (!res.ok) throw new Error("Backend rejected request.");
-
         const data = await res.json();
-        currentSessionId = data.session_id;
-        localStorage.setItem('classghost_session_id', currentSessionId);
-
-        document.getElementById('cookies').value = "";
-        validateForm();
-
-        showActiveUi();
-        pollInterval = setInterval(checkStatus, 6000);
-      } catch (err) {
-        statusBox.innerText = "Error: Could not reach backend server.";
-        document.getElementById('startBtn').disabled = false;
+        document.getElementById('liveMsg').textContent = data.message || data.error;
+      } catch (e) {
+        document.getElementById('liveMsg').textContent = "Network error reaching server.";
       }
     }
 
-    function showActiveUi() {
-      document.getElementById('status-box').innerText = "Status: Bot is in class (Authenticated).";
-      document.getElementById('startBtn').style.display = "none";
-      document.getElementById('stopBtn').style.display = "block";
-    }
-
-    async function checkStatus() {
-      if (!currentSessionId) return;
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    async function leaveClass() {
+      const base = getBaseUrl();
+      if (!base) return;
+      document.getElementById('liveMsg').textContent = "Sending emergency leave signal...";
       try {
-        const res = await fetch(`${backend}/status?session_id=${currentSessionId}`);
+        const res = await fetch(`${base}/leave`, { method: 'POST' });
         const data = await res.json();
-        if (data.status === "ended") {
-          resetUi();
-        }
-      } catch (e) {}
+        document.getElementById('liveMsg').textContent = data.message;
+      } catch (e) {
+        document.getElementById('liveMsg').textContent = "Error contacting server.";
+      }
     }
 
-    async function stopBot() {
-      if (!currentSessionId) return;
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    async function pollStatus() {
+      const base = getBaseUrl();
+      if (!base) return;
       try {
-        await fetch(`${backend}/stop`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id: currentSessionId })
-        });
+        const res = await fetch(`${base}/status`);
+        const state = await res.json();
+        document.getElementById('statusText').textContent = `${state.status.toUpperCase()} • ${state.participants} in call`;
+        document.getElementById('liveMsg').textContent = state.message;
       } catch (e) {}
-      resetUi();
-    }
-
-    function resetUi() {
-      clearInterval(pollInterval);
-      localStorage.removeItem('classghost_session_id');
-      currentSessionId = null;
-      document.getElementById('status-box').innerText = "Status: Meeting ended / Disconnected";
-      document.getElementById('startBtn').style.display = "block";
-      document.getElementById('startBtn').disabled = true;
-      document.getElementById('stopBtn').style.display = "none";
-    }
-
-    // Restore UI if tab was reloaded or switched away
-    if (currentSessionId) {
-      showActiveUi();
-      pollInterval = setInterval(checkStatus, 6000);
-    }
-
-    document.getElementById('meetingUrl').addEventListener('input', validateForm);
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW Registered', reg))
-          .catch(err => console.error('SW Registration Failed', err));
-      });
     }
   </script>
 </body>
