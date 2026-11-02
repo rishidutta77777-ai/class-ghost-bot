@@ -8,6 +8,24 @@
   <style>
     body { background-color: #090d16; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
     .card { background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(51, 65, 85, 0.75); }
+    .btn-disabled {
+      background-color: #1e293b !important;
+      color: #64748b !important;
+      border: 1px solid #334155 !important;
+      box-shadow: none !important;
+      cursor: not-allowed !important;
+      opacity: 0.65;
+    }
+    .btn-send-active {
+      background-color: #059669;
+      color: #ffffff;
+      box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.6);
+    }
+    .btn-leave-active {
+      background-color: #e11d48;
+      color: #ffffff;
+      box-shadow: 0 10px 15px -3px rgba(136, 19, 55, 0.6);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
@@ -21,12 +39,27 @@
         <p id="statusText" class="text-xs text-slate-400">Connecting to Render Cloud...</p>
       </div>
     </div>
-    <button onclick="document.getElementById('serverBox').classList.toggle('hidden')" class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-      ⚙️ Server
-    </button>
+    <div class="flex gap-1.5">
+      <button onclick="document.getElementById('cookieBox').classList.toggle('hidden')" class="text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700">
+        🍪 Cookies
+      </button>
+      <button onclick="document.getElementById('serverBox').classList.toggle('hidden')" class="text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700">
+        ⚙️ Server
+      </button>
+    </div>
   </header>
 
-  <!-- Pre-Filled Server URL Drawer -->
+  <!-- Google Cookies Drawer -->
+  <div id="cookieBox" class="hidden card rounded-xl p-3.5 my-2 space-y-2">
+    <label class="text-xs text-emerald-400 font-semibold uppercase">Paste Google Account Cookies (JSON)</label>
+    <textarea id="googleCookies" rows="4" placeholder='Paste exported Cookie-Editor JSON array or auth.json here so the bot joins logged into your Google Account...' class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs font-mono text-slate-200"></textarea>
+    <div class="flex gap-2">
+      <button onclick="saveCookies()" class="flex-1 bg-emerald-600 py-2 rounded-lg text-xs font-bold">Save Cookies on Phone</button>
+      <button onclick="clearCookies()" class="bg-slate-800 px-3 py-2 rounded-lg text-xs text-rose-400 border border-slate-700">Clear</button>
+    </div>
+  </div>
+
+  <!-- Server URL Drawer -->
   <div id="serverBox" class="hidden card rounded-xl p-3.5 my-2 space-y-2">
     <label class="text-xs text-slate-400 font-semibold uppercase">Cloud Backend URL</label>
     <input id="backendUrl" type="url" value="https://class-ghost-backend.onrender.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-emerald-400 font-mono" />
@@ -37,88 +70,179 @@
   <main class="space-y-4 my-auto py-3">
     <div class="card rounded-2xl p-5 space-y-4 shadow-xl">
       <div>
-        <label class="text-xs font-semibold uppercase text-slate-400">Google Meet Class Link</label>
-        <input id="meetUrl" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
+        <label class="text-xs font-semibold uppercase text-slate-400">Google Meet Class Link *</label>
+        <input id="meetUrl" oninput="validateFormAndSyncButtons()" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
       </div>
 
       <div>
-        <label class="text-xs font-semibold uppercase text-slate-400">Custom Name to Join With</label>
-        <input id="studentName" type="text" value="Hrishikesh Dutta" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
+        <label class="text-xs font-semibold uppercase text-slate-400">Custom Name to Join With *</label>
+        <input id="studentName" oninput="validateFormAndSyncButtons()" type="text" value="Hrishikesh Dutta" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-3 text-sm outline-none focus:border-emerald-500" />
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="text-xs font-semibold uppercase text-slate-400">Max Mins (2Hr Class)</label>
-          <input id="maxDuration" type="number" value="125" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500" />
+          <label class="text-xs font-semibold uppercase text-slate-400">Max Mins (2Hr Class) *</label>
+          <input id="maxDuration" oninput="validateFormAndSyncButtons()" type="number" value="125" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500" />
         </div>
         <div>
-          <label class="text-xs font-semibold uppercase text-slate-400">Auto-Leave Below</label>
-          <input id="minParticipants" type="number" value="5" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500" />
+          <label class="text-xs font-semibold uppercase text-slate-400">Auto-Leave Below *</label>
+          <input id="minParticipants" oninput="validateFormAndSyncButtons()" type="number" value="5" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500" />
         </div>
       </div>
 
       <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 space-y-1">
-        <div class="flex justify-between"><span>🛡️ Impersonation Bypass:</span><span class="text-emerald-400 font-mono">Zero-Width Active</span></div>
+        <div class="flex justify-between"><span>🔑 Account Auth:</span><span id="cookieBadge" class="text-amber-400 font-mono">Guest (No Cookies)</span></div>
         <div class="flex justify-between"><span>🎙️ Camera & Mic:</span><span class="text-emerald-400 font-mono">Hardware Muted</span></div>
-        <div class="flex justify-between"><span>⚡ Cloud Server:</span><span class="text-emerald-400 font-mono">Connected</span></div>
+        <div class="flex justify-between"><span>📸 Snapshot Link:</span><a id="viewLink" href="https://class-ghost-backend.onrender.com/view" target="_blank" class="text-cyan-400 underline font-mono">/view</a></div>
       </div>
 
-      <button id="joinBtn" onclick="joinClass()" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-emerald-950">
+      <!-- Send Stealth Bot Button (Starts Discolored/Disabled until fields are valid) -->
+      <button id="joinBtn" onclick="joinClass()" disabled class="btn-disabled w-full transition font-bold py-3.5 rounded-xl text-sm">
         🚀 SEND STEALTH BOT TO CLASS
       </button>
 
-      <button id="leaveBtn" onclick="leaveClass()" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-rose-950">
+      <!-- Emergency Leave Button (Starts Discolored/Disabled until bot is sent) -->
+      <button id="leaveBtn" onclick="leaveClass()" disabled class="btn-disabled w-full transition font-bold py-3.5 rounded-xl text-sm">
         🛑 EMERGENCY LEAVE CLASS NOW
       </button>
+
+      <!-- Live Screen Snapshot Viewer Button -->
+      <button onclick="toggleSnapshot()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 py-2.5 rounded-xl text-xs font-semibold">
+        📸 VIEW LIVE BOT SCREENSHOT (/view)
+      </button>
+
+      <div id="snapContainer" class="hidden space-y-2 pt-1">
+        <img id="snapImg" src="" alt="Bot Live View" class="w-full rounded-lg border border-slate-700" />
+        <button onclick="refreshSnapshot()" class="w-full bg-slate-800 py-1.5 rounded text-xs text-cyan-400">🔄 Refresh Snapshot</button>
+      </div>
     </div>
 
     <!-- Live Status Box -->
     <div class="card rounded-xl p-3.5 text-xs font-mono space-y-1">
       <div class="text-slate-400 uppercase text-[10px]">Live Server Telemetry</div>
-      <div id="liveMsg" class="text-emerald-400 break-words">Connecting to https://class-ghost-backend.onrender.com...</div>
+      <div id="liveMsg" class="text-emerald-400 break-words">Fill in the Google Meet link above to unlock Send button.</div>
     </div>
   </main>
 
   <footer class="text-center text-[11px] text-slate-500 py-2">
-    Zero-Width Anti-Spoof Name • 512MB RAM Protected • KeepAlive Active
+    Smart Button Lock • Live /view Snapshot • 512MB RAM Protected
   </footer>
 
   <script>
     const DEFAULT_BACKEND = "https://class-ghost-backend.onrender.com";
+    let botIsRunning = false;
 
     window.onload = () => {
-      const saved = localStorage.getItem('backendUrl') || DEFAULT_BACKEND;
-      localStorage.setItem('backendUrl', saved);
-      document.getElementById('backendUrl').value = saved;
+      const savedUrl = localStorage.getItem('backendUrl') || DEFAULT_BACKEND;
+      localStorage.setItem('backendUrl', savedUrl);
+      document.getElementById('backendUrl').value = savedUrl;
+      document.getElementById('viewLink').href = savedUrl + "/view";
+
+      const savedCookies = localStorage.getItem('googleCookies') || '';
+      document.getElementById('googleCookies').value = savedCookies;
+      updateCookieBadge();
+
+      validateFormAndSyncButtons();
       pollStatus();
-      setInterval(pollStatus, 5000);
+      setInterval(pollStatus, 4000);
     };
 
     function getBaseUrl() {
       return (localStorage.getItem('backendUrl') || DEFAULT_BACKEND).replace(/\/+$/, '');
     }
 
+    function updateCookieBadge() {
+      const c = (localStorage.getItem('googleCookies') || '').trim();
+      const badge = document.getElementById('cookieBadge');
+      if (c.length > 20) {
+        badge.textContent = "Cookies Loaded ✓";
+        badge.className = "text-emerald-400 font-mono";
+      } else {
+        badge.textContent = "Guest Mode (No Cookies)";
+        badge.className = "text-amber-400 font-mono";
+      }
+    }
+
+    function saveCookies() {
+      const val = document.getElementById('googleCookies').value.trim();
+      localStorage.setItem('googleCookies', val);
+      updateCookieBadge();
+      document.getElementById('cookieBox').classList.add('hidden');
+      document.getElementById('liveMsg').textContent = "Saved Google Cookies! Bot will join logged in.";
+    }
+
+    function clearCookies() {
+      localStorage.removeItem('googleCookies');
+      document.getElementById('googleCookies').value = '';
+      updateCookieBadge();
+    }
+
     function saveBackend() {
       const val = document.getElementById('backendUrl').value.trim().replace(/\/+$/, '') || DEFAULT_BACKEND;
       localStorage.setItem('backendUrl', val);
+      document.getElementById('viewLink').href = val + "/view";
       document.getElementById('serverBox').classList.add('hidden');
       document.getElementById('liveMsg').textContent = "Saved Backend: " + val;
       pollStatus();
     }
 
+    function areAllFieldsFilled() {
+      const meetUrl = document.getElementById('meetUrl').value.trim();
+      const studentName = document.getElementById('studentName').value.trim();
+      const maxDuration = document.getElementById('maxDuration').value.trim();
+      const minParticipants = document.getElementById('minParticipants').value.trim();
+
+      const validMeet = meetUrl.startsWith("https://meet.google.com/") && meetUrl.length > 28 && !meetUrl.includes("xxx-xxxx-xxx");
+      return validMeet && studentName.length > 0 && Number(maxDuration) > 0 && Number(minParticipants) > 0;
+    }
+
+    function validateFormAndSyncButtons() {
+      const joinBtn = document.getElementById('joinBtn');
+      const leaveBtn = document.getElementById('leaveBtn');
+      const fieldsReady = areAllFieldsFilled();
+
+      if (botIsRunning) {
+        // Bot is sent/in class: Discolor Send button, Color Emergency Leave button
+        joinBtn.disabled = true;
+        joinBtn.className = "btn-disabled w-full transition font-bold py-3.5 rounded-xl text-sm";
+        joinBtn.textContent = "✅ BOT SENT & ACTIVE IN CLASS";
+
+        leaveBtn.disabled = false;
+        leaveBtn.className = "btn-leave-active w-full active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm";
+        leaveBtn.textContent = "🛑 EMERGENCY LEAVE CLASS NOW";
+      } else {
+        // Bot is idle: Emergency Leave is discolored; Send button only colors if ALL fields are filled
+        leaveBtn.disabled = true;
+        leaveBtn.className = "btn-disabled w-full transition font-bold py-3.5 rounded-xl text-sm";
+        leaveBtn.textContent = "🛑 EMERGENCY LEAVE CLASS NOW";
+
+        if (fieldsReady) {
+          joinBtn.disabled = false;
+          joinBtn.className = "btn-send-active w-full active:scale-[0.99] transition font-bold py-3.5 rounded-xl text-sm";
+          joinBtn.textContent = "🚀 SEND STEALTH BOT TO CLASS";
+        } else {
+          joinBtn.disabled = true;
+          joinBtn.className = "btn-disabled w-full transition font-bold py-3.5 rounded-xl text-sm";
+          joinBtn.textContent = "🔒 FILL ALL FIELDS TO UNLOCK BOT";
+        }
+      }
+    }
+
     async function joinClass() {
+      if (!areAllFieldsFilled() || botIsRunning) return;
+
       const base = getBaseUrl();
       const meetUrl = document.getElementById('meetUrl').value.trim();
       const studentName = document.getElementById('studentName').value.trim();
-      const maxDuration = document.getElementById('maxDuration').value;
-      const minParticipants = document.getElementById('minParticipants').value;
+      const maxDuration = document.getElementById('maxDuration').value.trim();
+      const minParticipants = document.getElementById('minParticipants').value.trim();
+      const googleCookies = localStorage.getItem('googleCookies') || '';
 
-      if (!meetUrl || !meetUrl.includes("meet.google.com")) {
-        document.getElementById('liveMsg').textContent = "ERROR: Please paste a valid Google Meet link first.";
-        return;
-      }
+      // Immediately discolor Send button and light up Emergency Leave button
+      botIsRunning = true;
+      validateFormAndSyncButtons();
+      document.getElementById('liveMsg').textContent = "Deploying stealth bot... (Wait ~20s for browser boot)";
 
-      document.getElementById('liveMsg').textContent = "Deploying stealth bot... (Wait ~15s for browser boot)";
       try {
         const res = await fetch(`${base}/join`, {
           method: 'POST',
@@ -127,28 +251,51 @@
             meet_url: meetUrl,
             student_name: studentName,
             max_duration: maxDuration,
-            min_participants: minParticipants
+            min_participants: minParticipants,
+            google_cookies: googleCookies
           })
         });
         const data = await res.json();
+        if (!res.ok) {
+          botIsRunning = false;
+          validateFormAndSyncButtons();
+        }
         document.getElementById('liveMsg').textContent = data.message || data.error;
         pollStatus();
       } catch (e) {
+        botIsRunning = false;
+        validateFormAndSyncButtons();
         document.getElementById('liveMsg').textContent = "Network error reaching Render server.";
       }
     }
 
     async function leaveClass() {
+      if (!botIsRunning) return;
       const base = getBaseUrl();
       document.getElementById('liveMsg').textContent = "Sending emergency leave signal...";
       try {
         const res = await fetch(`${base}/leave`, { method: 'POST' });
         const data = await res.json();
+        botIsRunning = false;
+        validateFormAndSyncButtons();
         document.getElementById('liveMsg').textContent = data.message;
         pollStatus();
       } catch (e) {
         document.getElementById('liveMsg').textContent = "Error contacting server.";
       }
+    }
+
+    function toggleSnapshot() {
+      const box = document.getElementById('snapContainer');
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) {
+        refreshSnapshot();
+      }
+    }
+
+    function refreshSnapshot() {
+      const base = getBaseUrl();
+      document.getElementById('snapImg').src = `${base}/view?t=${Date.now()}`;
     }
 
     async function pollStatus() {
@@ -159,6 +306,9 @@
         const statusUpper = (state.status || 'idle').toUpperCase();
         document.getElementById('statusText').textContent = `${statusUpper} • ${state.participants || 0} in call`;
         document.getElementById('liveMsg').textContent = state.message || "Ready to deploy.";
+
+        botIsRunning = (state.status === 'starting' || state.status === 'in_class');
+        validateFormAndSyncButtons();
 
         const dot = document.getElementById('dot');
         if (state.status === 'in_class') {
