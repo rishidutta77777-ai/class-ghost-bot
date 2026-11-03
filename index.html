@@ -3,65 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Class Ghost Pro</title>
-  <link rel="manifest" href="manifest.json">
+  <title>Class Ghost</title>
   <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="theme-color" content="#0a0a10">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0d0f17">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #07070c;
-      --card-bg: rgba(18, 18, 28, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --accent-cyan: #00f2fe;
-      --accent-purple: #4facfe;
-      --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      --bg: #090b10;
+      --card-bg: rgba(18, 22, 34, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
       --btn-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --btn-red: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --text: #f8fafc;
+      --muted: #94a3b8;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg-dark);
+      background: var(--bg);
       background-image: 
-        radial-gradient(at 0% 0%, rgba(79, 172, 254, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
-      color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.12) 0, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(129, 140, 248, 0.10) 0, transparent 40%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .container {
       width: 100%;
       max-width: 440px;
-      perspective: 1000px;
     }
 
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 30px 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
       position: relative;
       overflow: hidden;
     }
@@ -69,124 +57,92 @@
     .card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 3px;
       background: var(--accent-gradient);
     }
 
-    .header {
+    .title-area {
       text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 12px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-    }
-
-    .logo-badge img {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      margin-bottom: 20px;
     }
 
     h1 {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
       font-size: 13px;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-top: 4px;
-      font-weight: 500;
     }
 
-    .input-group {
-      margin-bottom: 16px;
+    .field {
+      margin-bottom: 14px;
     }
 
     label {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .required-tag {
-      color: var(--accent-cyan);
+    .badge {
+      color: var(--accent);
       font-size: 11px;
     }
 
     input, textarea {
       width: 100%;
-      background: rgba(10, 10, 16, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: var(--text-main);
+      background: rgba(10, 13, 20, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text);
       font-size: 14px;
-      font-family: inherit;
-      transition: all 0.2s ease;
       outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
 
     input:focus, textarea:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(0, 242, 254, 0.25);
-      background: rgba(15, 15, 24, 0.8);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
     }
 
     textarea {
-      height: 75px;
+      height: 80px;
       resize: vertical;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .button-group {
-      margin-top: 24px;
     }
 
     button {
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 15px;
       font-weight: 700;
-      font-family: inherit;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-top: 18px;
+      transition: all 0.2s ease;
+      color: #fff;
     }
 
     .btn-start {
       background: var(--btn-green);
-      color: #ffffff;
       box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
     }
 
@@ -199,265 +155,235 @@
 
     .btn-stop {
       background: var(--btn-red);
-      color: #ffffff;
       box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
       display: none;
     }
 
-    button:not(:disabled):hover {
-      transform: translateY(-2px);
-      filter: brightness(1.1);
-    }
-
-    button:not(:disabled):active {
-      transform: translateY(0);
-    }
-
-    .status-panel {
-      margin-top: 18px;
-      padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
+    .status-box {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .status-indicator {
+    .dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: #64748b;
-      transition: all 0.3s ease;
+      background: #64748b;
+      flex-shrink: 0;
     }
 
-    .status-indicator.active {
-      background-color: #10b981;
-      box-shadow: 0 0 10px #10b981;
+    .dot.active {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
     }
 
-    .status-indicator.error {
-      background-color: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
+    .dot.error {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
     }
 
     .status-text {
       font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 500;
-      white-space: nowrap;
+      color: var(--muted);
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .quick-links {
+    .links {
       display: flex;
       justify-content: center;
       gap: 16px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
-    .quick-link {
+    .link {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--muted);
       text-decoration: none;
       transition: color 0.2s ease;
     }
 
-    .quick-link:hover {
-      color: var(--accent-cyan);
+    .link:hover {
+      color: var(--accent);
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="card">
-      <div class="header">
-        <div class="logo-badge">
-          <img src="icon.png" alt="Class Ghost Logo">
-        </div>
-        <h1>Class Ghost Pro</h1>
-        <p class="subtitle">Autonomous Session Assistant</p>
-      </div>
+<div class="container">
+  <div class="card">
+    <div class="title-area">
+      <h1>Class Ghost Pro</h1>
+      <p class="subtitle">Cloud Meeting Runner</p>
+    </div>
 
-      <div class="input-group">
-        <label>Backend Endpoint</label>
-        <input type="text" id="backendUrl" value="https://class-ghost-backend.onrender.com">
-      </div>
+    <div class="field">
+      <label>Backend Endpoint</label>
+      <input type="text" id="backendUrl" value="https://class-ghost-backend.onrender.com">
+    </div>
 
-      <div class="input-group">
-        <label>Meeting Target <span class="required-tag">Required</span></label>
-        <input type="text" id="meetingUrl" placeholder="https://meet.google.com/xxx-xxxx-xxx">
-      </div>
+    <div class="field">
+      <label>Meeting Link <span class="badge">Required</span></label>
+      <input type="text" id="meetingUrl" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+    </div>
 
-      <div class="input-group">
-        <label>Session Cookies <span class="required-tag">JSON Array</span></label>
-        <textarea id="cookies" placeholder="Paste exported JSON payload from Cookie-Editor here..." oninput="validateForm()"></textarea>
-      </div>
+    <div class="field">
+      <label>Session Cookies (JSON) <span class="badge">Required</span></label>
+      <textarea id="cookies" placeholder="Paste JSON exported from Cookie-Editor..." oninput="validate()"></textarea>
+    </div>
 
-      <div class="button-group">
-        <button class="btn-start" id="startBtn" onclick="startBot()" disabled>
-          <span>Initialize Session</span>
-        </button>
-        <button class="btn-stop" id="stopBtn" onclick="stopBot()">
-          <span>Terminate Session</span>
-        </button>
-      </div>
+    <button class="btn-start" id="startBtn" onclick="startSession()" disabled>
+      <span>Deploy Bot to Call</span>
+    </button>
+    <button class="btn-stop" id="stopBtn" onclick="stopSession()">
+      <span>Leave Call (Stop)</span>
+    </button>
 
-      <div class="status-panel">
-        <div class="status-indicator" id="statusDot"></div>
-        <div class="status-text" id="statusText">System Ready (Paste cookies to arm)</div>
-      </div>
+    <div class="status-box">
+      <div class="dot" id="dot"></div>
+      <div class="status-text" id="statusMsg">Idle: Paste cookies to enable</div>
+    </div>
 
-      <div class="quick-links">
-        <a class="quick-link" href="https://class-ghost-backend.onrender.com/view" target="_blank">Open Live Snapshot ↗</a>
-      </div>
+    <div class="links">
+      <a class="link" id="viewLink" href="https://class-ghost-backend.onrender.com/view" target="_blank">Open Live Screenshot ↗</a>
     </div>
   </div>
+</div>
 
-  <script>
-    let currentSessionId = localStorage.getItem('classghost_session_id');
-    let pollInterval = null;
+<script>
+  let sessionId = localStorage.getItem('cg_session_id');
+  let poller = null;
 
-    function setStatus(text, state = "idle") {
-      const statusText = document.getElementById('statusText');
-      const statusDot = document.getElementById('statusDot');
-      statusText.innerText = text;
-      statusDot.className = "status-indicator " + (state === "active" ? "active" : state === "error" ? "error" : "");
+  function updateStatus(text, type = "idle") {
+    document.getElementById('statusMsg').innerText = text;
+    const dot = document.getElementById('dot');
+    dot.className = "dot " + (type === "active" ? "active" : type === "error" ? "error" : "");
+  }
+
+  function validate() {
+    const raw = document.getElementById('cookies').value.trim();
+    const btn = document.getElementById('startBtn');
+
+    if (!raw) {
+      if (!sessionId) {
+        btn.disabled = true;
+        updateStatus("Idle: Paste cookies to enable", "idle");
+      }
+      return false;
     }
 
-    function validateForm() {
-      const cookiesRaw = document.getElementById('cookies').value.trim();
-      const startBtn = document.getElementById('startBtn');
-
-      if (!cookiesRaw) {
-        if (!currentSessionId) {
-          startBtn.disabled = true;
-          setStatus("System Ready (Paste cookies to arm)", "idle");
-        }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        btn.disabled = true;
+        updateStatus("Error: Cookies must be a non-empty JSON array", "error");
         return false;
       }
-
-      try {
-        const parsed = JSON.parse(cookiesRaw);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-          startBtn.disabled = true;
-          setStatus("Error: JSON must be a non-empty array", "error");
-          return false;
-        }
-      } catch (e) {
-        startBtn.disabled = true;
-        setStatus("Error: Invalid JSON syntax in cookie field", "error");
-        return false;
-      }
-
-      startBtn.disabled = false;
-      setStatus("Armed & ready to deploy", "active");
-      return true;
+    } catch (e) {
+      btn.disabled = true;
+      updateStatus("Error: Invalid JSON syntax", "error");
+      return false;
     }
 
-    async function startBot() {
-      if (!validateForm()) return;
+    btn.disabled = false;
+    updateStatus("Ready to deploy", "active");
+    return true;
+  }
 
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
-      const url = document.getElementById('meetingUrl').value.trim();
-      const cookiesRaw = document.getElementById('cookies').value.trim();
+  async function startSession() {
+    if (!validate()) return;
 
-      if (!url) {
-        setStatus("Error: Meeting Target URL required", "error");
-        return;
-      }
+    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    const url = document.getElementById('meetingUrl').value.trim();
+    const cookiesRaw = document.getElementById('cookies').value.trim();
 
-      const parsedCookies = JSON.parse(cookiesRaw);
-
-      setStatus("Deploying runner to session...", "active");
-      document.getElementById('startBtn').disabled = true;
-
-      try {
-        const res = await fetch(`${backend}/start`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            url: url, 
-            name: "Authenticated Bot",
-            cookies: parsedCookies 
-          })
-        });
-
-        if (!res.ok) throw new Error("Endpoint rejected deployment.");
-
-        const data = await res.json();
-        currentSessionId = data.session_id;
-        localStorage.setItem('classghost_session_id', currentSessionId);
-
-        document.getElementById('cookies').value = "";
-        validateForm();
-
-        showActiveUi();
-        pollInterval = setInterval(checkStatus, 6000);
-      } catch (err) {
-        setStatus("Connection Failed: Unable to contact backend", "error");
-        document.getElementById('startBtn').disabled = false;
-      }
+    if (!url) {
+      alert("Please enter a meeting link.");
+      return;
     }
 
-    function showActiveUi() {
-      setStatus("Connected & Active in Class", "active");
-      document.getElementById('startBtn').style.display = "none";
-      document.getElementById('stopBtn').style.display = "flex";
-    }
+    updateStatus("Connecting to runner...", "active");
+    document.getElementById('startBtn').disabled = true;
 
-    async function checkStatus() {
-      if (!currentSessionId) return;
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
-      try {
-        const res = await fetch(`${backend}/status?session_id=${currentSessionId}`);
-        const data = await res.json();
-        if (data.status === "ended") {
-          resetUi();
-        }
-      } catch (e) {}
-    }
-
-    async function stopBot() {
-      if (!currentSessionId) return;
-      const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
-      try {
-        await fetch(`${backend}/stop`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id: currentSessionId })
-        });
-      } catch (e) {}
-      resetUi();
-    }
-
-    function resetUi() {
-      clearInterval(pollInterval);
-      localStorage.removeItem('classghost_session_id');
-      currentSessionId = null;
-      setStatus("Session Terminated", "idle");
-      document.getElementById('startBtn').style.display = "flex";
-      document.getElementById('startBtn').disabled = true;
-      document.getElementById('stopBtn').style.display = "none";
-    }
-
-    if (currentSessionId) {
-      showActiveUi();
-      pollInterval = setInterval(checkStatus, 6000);
-    }
-
-    document.getElementById('meetingUrl').addEventListener('input', validateForm);
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW Registered', reg))
-          .catch(err => console.error('SW Registration Failed', err));
+    try {
+      const parsed = JSON.parse(cookiesRaw);
+      const res = await fetch(`${backend}/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url, cookies: parsed })
       });
+
+      if (!res.ok) throw new Error("Backend failed to start");
+
+      const data = await res.json();
+      sessionId = data.session_id;
+      localStorage.setItem('cg_session_id', sessionId);
+
+      document.getElementById('cookies').value = "";
+      validate();
+
+      setActiveUi();
+      poller = setInterval(checkStatus, 6000);
+    } catch (err) {
+      updateStatus("Error: Could not reach backend", "error");
+      document.getElementById('startBtn').disabled = false;
     }
-  </script>
+  }
+
+  function setActiveUi() {
+    updateStatus("Active in Call (Authenticated)", "active");
+    document.getElementById('startBtn').style.display = "none";
+    document.getElementById('stopBtn').style.display = "flex";
+  }
+
+  async function checkStatus() {
+    if (!sessionId) return;
+    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    try {
+      const res = await fetch(`${backend}/status?session_id=${sessionId}`);
+      const data = await res.json();
+      if (data.status === "ended") {
+        resetUi("Session ended / Disconnected");
+      }
+    } catch (e) {}
+  }
+
+  async function stopSession() {
+    if (!sessionId) return;
+    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    try {
+      await fetch(`${backend}/stop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+    } catch (e) {}
+    resetUi("Session stopped by user");
+  }
+
+  function resetUi(msg = "Session terminated") {
+    clearInterval(poller);
+    localStorage.removeItem('cg_session_id');
+    sessionId = null;
+    updateStatus(msg, "idle");
+    document.getElementById('startBtn').style.display = "flex";
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').style.display = "none";
+  }
+
+  if (sessionId) {
+    setActiveUi();
+    poller = setInterval(checkStatus, 6000);
+  }
+
+  document.getElementById('meetingUrl').addEventListener('input', validate);
+</script>
 </body>
 </html>
