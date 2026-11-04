@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Class Ghost</title>
+  <title>Class Ghost Pro</title>
   <link rel="icon" type="image/png" href="icon.png">
   <meta name="theme-color" content="#0d0f17">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +40,7 @@
 
     .container {
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
     }
 
     .card {
@@ -64,7 +64,7 @@
 
     .title-area {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     h1 {
@@ -77,6 +77,36 @@
       font-size: 13px;
       color: var(--muted);
       margin-top: 4px;
+    }
+
+    /* Server Switcher Pill */
+    .server-switcher {
+      display: flex;
+      background: rgba(10, 13, 20, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+
+    .server-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .server-tab.active {
+      background: var(--accent-gradient);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
     }
 
     .field {
@@ -118,7 +148,7 @@
     }
 
     textarea {
-      height: 80px;
+      height: 75px;
       resize: vertical;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
@@ -136,7 +166,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 14px;
       transition: all 0.2s ease;
       color: #fff;
     }
@@ -160,7 +190,7 @@
     }
 
     .status-box {
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 12px;
       background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border);
@@ -196,22 +226,69 @@
       white-space: nowrap;
     }
 
-    .links {
+    /* In-App Live Snapshot Section */
+    .snapshot-section {
+      margin-top: 18px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .snapshot-header {
       display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 16px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    .link {
+    .snapshot-title {
       font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s ease;
     }
 
-    .link:hover {
+    .btn-refresh {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       color: var(--accent);
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 0;
+      width: auto;
+      cursor: pointer;
+    }
+
+    .btn-refresh:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    .snapshot-frame {
+      width: 100%;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .snapshot-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .snapshot-placeholder {
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+      padding: 12px;
     }
   </style>
 </head>
@@ -224,9 +301,19 @@
       <p class="subtitle">Cloud Meeting Runner</p>
     </div>
 
-    <div class="field">
-      <label>Backend Endpoint</label>
-      <input type="text" id="backendUrl" value="https://class-ghost-backend.onrender.com">
+    <!-- Server Selector -->
+    <div class="server-switcher">
+      <div class="server-tab active" id="tabCodespace" onclick="setServer('codespace')">
+        ⚡ Codespace (Stealth)
+      </div>
+      <div class="server-tab" id="tabRender" onclick="setServer('render')">
+        ☁️ Render Cloud
+      </div>
+    </div>
+
+    <div class="field" id="endpointField">
+      <label>Active Endpoint <span class="badge" id="serverTag">GitHub Codespace</span></label>
+      <input type="text" id="backendUrl" placeholder="https://...-8000.app.github.dev" oninput="saveEndpoint()">
     </div>
 
     <div class="field">
@@ -243,7 +330,7 @@
       <span>Deploy Bot to Call</span>
     </button>
     <button class="btn-stop" id="stopBtn" onclick="stopSession()">
-      <span>Leave Call (Stop)</span>
+      <span>Leave Call & Stop VM</span>
     </button>
 
     <div class="status-box">
@@ -251,15 +338,62 @@
       <div class="status-text" id="statusMsg">Idle: Paste cookies to enable</div>
     </div>
 
-    <div class="links">
-      <a class="link" id="viewLink" href="https://class-ghost-backend.onrender.com/view" target="_blank">Open Live Screenshot ↗</a>
+    <!-- Integrated Snapshot Viewer -->
+    <div class="snapshot-section">
+      <div class="snapshot-header">
+        <span class="snapshot-title">Live Room View</span>
+        <button class="btn-refresh" onclick="refreshSnapshot()">🔄 Refresh</button>
+      </div>
+      <div class="snapshot-frame">
+        <img id="snapshotImg" alt="Meeting Snapshot" onload="onSnapshotLoaded()" onerror="onSnapshotError()">
+        <div class="snapshot-placeholder" id="snapshotPlaceholder">
+          No snapshot yet.<br>Deploy bot to preview screen.
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
 <script>
+  const RENDER_DEFAULT = "https://class-ghost-backend.onrender.com";
+  let activeServerType = localStorage.getItem('cg_server_type') || 'codespace';
+  let savedCodespaceUrl = localStorage.getItem('cg_codespace_url') || '';
   let sessionId = localStorage.getItem('cg_session_id');
   let poller = null;
+  let snapshotPoller = null;
+
+  function initServerSelection() {
+    if (activeServerType === 'render') {
+      document.getElementById('tabRender').classList.add('active');
+      document.getElementById('tabCodespace').classList.remove('active');
+      document.getElementById('backendUrl').value = RENDER_DEFAULT;
+      document.getElementById('serverTag').innerText = "Render Free";
+    } else {
+      document.getElementById('tabCodespace').classList.add('active');
+      document.getElementById('tabRender').classList.remove('active');
+      document.getElementById('backendUrl').value = savedCodespaceUrl;
+      document.getElementById('serverTag').innerText = "GitHub Codespace";
+    }
+  }
+
+  function setServer(type) {
+    activeServerType = type;
+    localStorage.setItem('cg_server_type', type);
+    initServerSelection();
+    refreshSnapshot();
+  }
+
+  function saveEndpoint() {
+    if (activeServerType === 'codespace') {
+      savedCodespaceUrl = document.getElementById('backendUrl').value.trim();
+      localStorage.setItem('cg_codespace_url', savedCodespaceUrl);
+    }
+  }
+
+  function getBackendUrl() {
+    return document.getElementById('backendUrl').value.replace(/\/$/, "");
+  }
 
   function updateStatus(text, type = "idle") {
     document.getElementById('statusMsg').innerText = text;
@@ -283,7 +417,7 @@
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed) || parsed.length === 0) {
         btn.disabled = true;
-        updateStatus("Error: Cookies must be a non-empty JSON array", "error");
+        updateStatus("Error: JSON must be an array", "error");
         return false;
       }
     } catch (e) {
@@ -299,17 +433,20 @@
 
   async function startSession() {
     if (!validate()) return;
-
-    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    const backend = getBackendUrl();
     const url = document.getElementById('meetingUrl').value.trim();
     const cookiesRaw = document.getElementById('cookies').value.trim();
 
+    if (!backend) {
+      alert("Please enter the Codespace or Render URL.");
+      return;
+    }
     if (!url) {
       alert("Please enter a meeting link.");
       return;
     }
 
-    updateStatus("Connecting to runner...", "active");
+    updateStatus("Deploying to " + (activeServerType === 'codespace' ? 'Codespace...' : 'Render...'), "active");
     document.getElementById('startBtn').disabled = true;
 
     try {
@@ -320,7 +457,7 @@
         body: JSON.stringify({ url: url, cookies: parsed })
       });
 
-      if (!res.ok) throw new Error("Backend failed to start");
+      if (!res.ok) throw new Error("Backend reject");
 
       const data = await res.json();
       sessionId = data.session_id;
@@ -331,6 +468,8 @@
 
       setActiveUi();
       poller = setInterval(checkStatus, 6000);
+      snapshotPoller = setInterval(refreshSnapshot, 10000);
+      setTimeout(refreshSnapshot, 4000);
     } catch (err) {
       updateStatus("Error: Could not reach backend", "error");
       document.getElementById('startBtn').disabled = false;
@@ -338,14 +477,14 @@
   }
 
   function setActiveUi() {
-    updateStatus("Active in Call (Authenticated)", "active");
+    updateStatus("Active in Call (" + (activeServerType === 'codespace' ? 'Codespace VM' : 'Render') + ")", "active");
     document.getElementById('startBtn').style.display = "none";
     document.getElementById('stopBtn').style.display = "flex";
   }
 
   async function checkStatus() {
     if (!sessionId) return;
-    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    const backend = getBackendUrl();
     try {
       const res = await fetch(`${backend}/status?session_id=${sessionId}`);
       const data = await res.json();
@@ -357,7 +496,9 @@
 
   async function stopSession() {
     if (!sessionId) return;
-    const backend = document.getElementById('backendUrl').value.replace(/\/$/, "");
+    const backend = getBackendUrl();
+    updateStatus("Stopping bot & shutting down...", "active");
+
     try {
       await fetch(`${backend}/stop`, {
         method: "POST",
@@ -365,11 +506,13 @@
         body: JSON.stringify({ session_id: sessionId })
       });
     } catch (e) {}
-    resetUi("Session stopped by user");
+
+    resetUi(activeServerType === 'codespace' ? "Left meeting & Codespace stopped" : "Session stopped by user");
   }
 
   function resetUi(msg = "Session terminated") {
     clearInterval(poller);
+    clearInterval(snapshotPoller);
     localStorage.removeItem('cg_session_id');
     sessionId = null;
     updateStatus(msg, "idle");
@@ -378,11 +521,32 @@
     document.getElementById('stopBtn').style.display = "none";
   }
 
+  function refreshSnapshot() {
+    const backend = getBackendUrl();
+    if (!backend) return;
+    const img = document.getElementById('snapshotImg');
+    // Timestamp query prevents mobile browser caching
+    img.src = `${backend}/view?t=${Date.now()}`;
+  }
+
+  function onSnapshotLoaded() {
+    document.getElementById('snapshotImg').style.display = 'block';
+    document.getElementById('snapshotPlaceholder').style.display = 'none';
+  }
+
+  function onSnapshotError() {
+    document.getElementById('snapshotImg').style.display = 'none';
+    document.getElementById('snapshotPlaceholder').style.display = 'block';
+    document.getElementById('snapshotPlaceholder').innerHTML = "No snapshot available yet.<br>Tap refresh after bot joins.";
+  }
+
+  initServerSelection();
   if (sessionId) {
     setActiveUi();
     poller = setInterval(checkStatus, 6000);
+    snapshotPoller = setInterval(refreshSnapshot, 10000);
+    refreshSnapshot();
   }
-
   document.getElementById('meetingUrl').addEventListener('input', validate);
 </script>
 </body>
